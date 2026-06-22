@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>체육 수업용 배드민턴 토너먼트 발전기 (A4 세로 최적화)</title>
+    <title>체육 수업용 배드민턴 토너먼트 발전기 (A4 가로 최적화)</title>
     <!-- Tailwind CSS for Modern UI -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons for aesthetic UI -->
@@ -16,11 +16,11 @@
             print-color-adjust: exact;
         }
 
-        /* A4용지 세로 한 장 인쇄 최적화 */
+        /* A4용지 가로 한 장 인쇄 최적화 */
         @media print {
             @page {
-                size: A4 portrait;
-                margin: 0.8cm 0.5cm 0.5cm 0.5cm;
+                size: A4 landscape; /* 용지 방향 가로 고정 */
+                margin: 0.5cm 0.4cm 0.4cm 0.4cm; /* 상하좌우 여백 극소화 */
             }
             body {
                 background-color: white;
@@ -38,10 +38,39 @@
                 width: 100% !important;
                 max-width: 100% !important;
             }
-            /* 프린트 시 대진표 강제 한 화면에 수축 맞춤 */
+            
+            /* 가로 한 장 맞춤 강제 컴팩트 수축 */
             #bracket-print-area {
-                height: 23cm !important;
+                height: 14.5cm !important; /* A4 가로 전체 높이에 부합하도록 수축 */
                 overflow: visible !important;
+            }
+            #bracket-outer-frame {
+                min-height: 290px !important;
+                height: 290px !important;
+            }
+            
+            /* 대진표 카드 간격 및 높이 컴팩트 축소 */
+            [id^="card-"] {
+                height: 22px !important;
+                font-size: 8px !important;
+                padding: 1px 4px !important;
+            }
+            
+            /* 중앙 결승전 영역 컴팩트 축소 */
+            #center-vs-badge {
+                width: 26px !important;
+                height: 26px !important;
+                font-size: 9px !important;
+                margin-top: 2px !important;
+                margin-bottom: 2px !important;
+            }
+            [id^="finalist-"] {
+                width: 105px !important;
+                padding: 3px !important;
+                font-size: 9px !important;
+            }
+            .no-print-gap {
+                gap: 4px !important;
             }
         }
     </style>
@@ -57,12 +86,12 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-extrabold tracking-tight">배드민턴 토너먼트 대진표 발전기</h1>
-                    <p class="text-xs text-indigo-100 mt-0.5">1반 ~ 13반 전체 명렬표 내장 • A4 세로 1장 좌우 대칭 출력형</p>
+                    <p class="text-xs text-indigo-100 mt-0.5">1반 ~ 13반 전체 명렬표 내장 • A4 가로 1장 완벽 대치 출력형</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2 text-xs bg-black/20 px-3.5 py-1.5 rounded-full border border-white/10">
                 <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-                <span>A4 세로 한 장 출력 최적화 지원</span>
+                <span>A4 가로 한 장 출력 최적화 완료</span>
             </div>
         </div>
     </header>
@@ -151,7 +180,7 @@
                     </button>
                     <button onclick="window.print()" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5">
                         <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-                        <span>A4 한장 인쇄 / PDF 저장</span>
+                        <span>A4 가로 인쇄 / PDF 저장</span>
                     </button>
                 </div>
             </div>
@@ -184,7 +213,7 @@
 
                 <!-- Print Footer Rule -->
                 <div class="mt-4 pt-2 border-t border-slate-200 text-center text-[9px] text-slate-400 font-medium">
-                    본 대진표는 싱글 엘리미네이션 양방향 대치 구조로 A4 세로에 맞춤 제작되었습니다.
+                    본 대진표는 싱글 엘리미네이션 양방향 대치 구조로 A4 가로에 맞춤 제작되었습니다.
                 </div>
             </div>
 
@@ -668,6 +697,23 @@
                     drawBracketLines();
                 }
             });
+
+            // Perfect print layout hook for recalculating dynamic SVG heights before printing
+            window.onbeforeprint = function() {
+                if(!outputSection.classList.contains('hidden')) {
+                    // Slight delay for media styles to apply fully before redraw
+                    setTimeout(() => {
+                        drawBracketLines();
+                    }, 50);
+                }
+            };
+            window.onafterprint = function() {
+                if(!outputSection.classList.contains('hidden')) {
+                    setTimeout(() => {
+                        drawBracketLines();
+                    }, 50);
+                }
+            };
         };
 
         function changeClass(classNo) {
@@ -791,7 +837,7 @@
             printParticipants.innerText = `출전 인원: ${count}명 (부전승: ${byeCount}명)`;
             bracketStatSummary.innerText = `실제 출전: ${count}명 / 대칭형 대진 구성: 양방향 ${bracketSize / 2}강 분할식 (부전승: ${byeCount}명)`;
 
-            // Render Symmetric Bracket
+            // Render Symmetrical Bracket
             renderSymmetricBracket(distributedPlayers, bracketSize);
 
             // Trigger lines drawing with slight delay to ensure browser layout is completed
@@ -940,8 +986,7 @@
                 const item = roundData[i];
                 const slotContainer = document.createElement('div');
                 
-                // Dynamic scaling height depending on round count to fit exactly in portrait page
-                // More rounds -> slightly more compact margins
+                // Dynamic scaling height depending on round count to fit exactly in portrait/landscape page
                 let heightClass = "my-1";
                 if (maxBracketSize >= 32) {
                     heightClass = "my-0.5";
@@ -970,7 +1015,7 @@
                     `;
                 } else {
                     card.className = "w-full bg-slate-50 text-slate-300 border border-dashed border-slate-200 rounded p-1 text-[9px] text-center leading-none h-[28px] flex items-center justify-center";
-                    card.innerText = "대기생";
+                    card.innerText = "대기자";
                 }
 
                 slotContainer.appendChild(card);
@@ -1005,6 +1050,7 @@
             svgLines.innerHTML = ""; // Clear existing lines
             
             const outerContainer = document.getElementById('bracket-outer-frame');
+            if (!outerContainer) return;
             const svgRect = outerContainer.getBoundingClientRect();
             
             // 1. Draw bracket wires on side rounds (e.g. Left and Right)
