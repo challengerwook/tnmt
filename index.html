@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>체육 수업용 배드민턴 토너먼트 발전기 (1~13반 전체 명렬 탑재)</title>
+    <title>체육 수업용 배드민턴 토너먼트 발전기 (A4 출력 최적화)</title>
     <!-- Tailwind CSS for Modern UI -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons for aesthetic UI -->
@@ -13,20 +13,67 @@
         body {
             font-family: 'Pretendard', sans-serif;
         }
-        /* Custom print styling */
+
+        /* A4용지 한 장 인쇄를 위한 전용 스타일 정의 */
         @media print {
+            @page {
+                size: A4 landscape; /* 가로 방향 인쇄 최적화 */
+                margin: 0.6cm;
+            }
             body {
                 background-color: white;
                 color: black;
+                min-height: auto;
             }
             .no-print {
                 display: none !important;
             }
             .print-card {
                 box-shadow: none !important;
-                border: 1px solid #ccc !important;
-                page-break-inside: avoid;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
             }
+            /* 인쇄 시 스크롤바 감추고 모든 콘텐츠 표시 */
+            .overflow-x-auto {
+                overflow: visible !important;
+            }
+        }
+
+        /* 대진표 연결선 스타일 (CSS 브래킷 와이어프레임) */
+        .bracket-branch {
+            position: absolute;
+            right: -24px;
+            width: 24px;
+            border-color: #64748b; /* slate-500 */
+            border-style: solid;
+            pointer-events: none;
+        }
+        /* 위쪽 카드의 연결선 (아래로 꺾임) */
+        .branch-top {
+            top: 50%;
+            height: calc(50% + 18px); /* 절반 아래 매치 간격만큼 연장 */
+            border-width: 2px 2px 0 0;
+            border-top-right-radius: 6px;
+        }
+        /* 아래쪽 카드의 연결선 (위로 꺾임) */
+        .branch-bottom {
+            bottom: 50%;
+            height: calc(50% + 18px);
+            border-width: 0 2px 2px 0;
+            border-bottom-right-radius: 6px;
+        }
+        /* 이전 라운드로부터 들어오는 수평 진입선 */
+        .branch-in {
+            position: absolute;
+            left: -24px;
+            top: 50%;
+            width: 24px;
+            border-bottom: 2px solid #64748b;
+            transform: translateY(-50%);
+            pointer-events: none;
         }
     </style>
 </head>
@@ -34,52 +81,52 @@
 
     <!-- Header Section (no-print) -->
     <header class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md no-print">
-        <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
-                <div class="p-2.5 bg-white/10 rounded-xl">
-                    <i data-lucide="sparkles" class="w-8 h-8 text-yellow-300"></i>
+                <div class="p-2 bg-white/10 rounded-xl">
+                    <i data-lucide="sparkles" class="w-7 h-7 text-yellow-300"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-extrabold tracking-tight">배드민턴 토너먼트 대진표 발전기</h1>
+                    <h1 class="text-xl font-extrabold tracking-tight">배드민턴 토너먼트 대진표 발전기</h1>
                     <p class="text-xs text-blue-100 mt-0.5">1반 ~ 13반 전체 명렬표 완벽 탑재 • 결석생 제외 대진표 랜덤 생성기</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-2 text-xs bg-black/20 px-3.5 py-2 rounded-full border border-white/10">
+            <div class="flex items-center space-x-2 text-xs bg-black/20 px-3.5 py-1.5 rounded-full border border-white/10">
                 <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-                <span>전교생(1~13반) 명단 탑재 완료!</span>
+                <span>A4 인쇄(가로 방향) 지원 완벽 최적화</span>
             </div>
         </div>
     </header>
 
     <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 py-6 md:py-8 flex-1 w-full">
+    <main class="max-w-7xl mx-auto px-4 py-4 md:py-6 flex-1 w-full">
         
         <!-- Step 1: Configuration Panel (no-print) -->
-        <section class="mb-8 no-print">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-6">
+        <section class="mb-6 no-print">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-5">
                 
                 <!-- Quick Selection Filters -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <!-- Class Selection -->
                     <div>
-                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                             <i data-lucide="graduation-cap" class="w-4 h-4 text-indigo-500"></i> 대상 학급 선택 (1반 ~ 13반)
                         </label>
-                        <select id="class-select" onchange="changeClass(this.value)" class="w-full bg-slate-50 border-2 border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 p-3 font-bold">
+                        <select id="class-select" onchange="changeClass(this.value)" class="w-full bg-slate-50 border-2 border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 p-2.5 font-bold">
                             <!-- Dynamically generated options from 1 to 13 -->
                         </select>
                     </div>
 
                     <!-- Gender Selection -->
                     <div>
-                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                             <i data-lucide="users" class="w-4 h-4 text-indigo-500"></i> 성별 선택
                         </label>
                         <div class="grid grid-cols-2 gap-2">
-                            <button id="gender-m-btn" onclick="selectGender('남')" class="py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-blue-50 border-blue-600 text-blue-700">
+                            <button id="gender-m-btn" onclick="selectGender('남')" class="py-2.5 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-blue-50 border-blue-600 text-blue-700">
                                 남자부 (남)
                             </button>
-                            <button id="gender-f-btn" onclick="selectGender('여')" class="py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-white border-slate-200 text-slate-600 hover:border-slate-300">
+                            <button id="gender-f-btn" onclick="selectGender('여')" class="py-2.5 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-white border-slate-200 text-slate-600 hover:border-slate-300">
                                 여자부 (여)
                             </button>
                         </div>
@@ -87,26 +134,26 @@
 
                     <!-- Generate Button -->
                     <div class="flex items-end">
-                        <button id="generate-tournament-btn" onclick="buildTournament()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-lg shadow-indigo-150 flex items-center justify-center gap-2 text-base">
-                            <i data-lucide="git-branch" class="w-5 h-5"></i>
+                        <button id="generate-tournament-btn" onclick="buildTournament()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-lg shadow-indigo-150 flex items-center justify-center gap-2 text-sm">
+                            <i data-lucide="git-branch" class="w-4.5 h-4.5"></i>
                             <span>대진표 생성하기</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Absentee Quick Selector -->
-                <div class="border-t border-slate-100 pt-5">
-                    <div class="flex items-center justify-between mb-3">
+                <div class="border-t border-slate-100 pt-4">
+                    <div class="flex items-center justify-between mb-2">
                         <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                             <i data-lucide="user-minus" class="w-4 h-4 text-red-500"></i> 
-                            오늘 결석생 체크 (<span class="text-red-500">체크된 학생은 대진에서 즉시 제외됩니다</span>)
+                            오늘 결석생 체크 (<span class="text-red-500 font-bold">체크된 학생은 대진에서 즉시 제외됩니다</span>)
                         </label>
                         <button onclick="clearAllAbsentees()" class="text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-bold flex items-center gap-1">
                             <i data-lucide="refresh-cw" class="w-3 h-3"></i> 전체 참석 처리 (초기화)
                         </button>
                     </div>
                     
-                    <div id="absentee-container" class="bg-slate-50 rounded-xl p-4 border border-slate-200 min-h-[100px]">
+                    <div id="absentee-container" class="bg-slate-50 rounded-xl p-3 border border-slate-200 min-h-[80px]">
                         <!-- List of students dynamically rendered -->
                     </div>
                 </div>
@@ -118,13 +165,13 @@
         <section id="output-section" class="hidden">
             
             <!-- Result Stats Card (no-print) -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 no-print shadow-sm">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 mb-4 flex flex-col sm:flex-row justify-between items-center gap-4 no-print shadow-sm">
                 <div class="flex items-center space-x-3">
                     <div class="bg-emerald-100 text-emerald-800 p-2 rounded-lg">
                         <i data-lucide="check" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h3 class="text-sm font-bold text-slate-800">대진표가 랜덤으로 작성되었습니다.</h3>
+                        <h3 class="text-sm font-bold text-slate-800">대진표가 성공적으로 작성되었습니다.</h3>
                         <p class="text-xs text-slate-500" id="bracket-stat-summary">실제 출전: 0명 (부전승: 0명)</p>
                     </div>
                 </div>
@@ -135,19 +182,19 @@
                     </button>
                     <button onclick="window.print()" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5">
                         <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-                        <span>대진표 인쇄 / PDF 저장</span>
+                        <span>대진표 한장 인쇄 / PDF 저장</span>
                     </button>
                 </div>
             </div>
 
             <!-- Printable Paper Container -->
-            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200 print-card">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 print-card">
                 
                 <!-- Print Header -->
-                <div class="text-center border-b-2 border-slate-800 pb-5 mb-8">
-                    <span class="text-xs font-bold text-indigo-600 tracking-widest border border-indigo-200 bg-indigo-50 px-2.5 py-1 rounded-full">BADMINTON TOURNAMENT</span>
-                    <h2 id="print-title" class="text-3xl font-black text-slate-900 mt-2">반 배드민턴 토너먼트 대진표</h2>
-                    <div class="flex justify-center items-center gap-4 text-xs text-slate-500 mt-2 font-medium">
+                <div class="text-center border-b-2 border-slate-800 pb-3 mb-6">
+                    <span class="text-[10px] font-bold text-indigo-600 tracking-widest border border-indigo-200 bg-indigo-50 px-2 py-0.5 rounded-full">BADMINTON TOURNAMENT</span>
+                    <h2 id="print-title" class="text-2xl font-black text-slate-900 mt-1">반 배드민턴 토너먼트 대진표</h2>
+                    <div class="flex justify-center items-center gap-4 text-[11px] text-slate-500 mt-1 font-medium">
                         <span id="print-date">작성일: 2026. 06. 22</span>
                         <span>•</span>
                         <span id="print-participants">출전 인원: 0명 (부전승 0명)</span>
@@ -155,14 +202,14 @@
                 </div>
 
                 <!-- Visual Tournament Area -->
-                <div class="overflow-x-auto py-4">
-                    <div id="bracket-visualization-container" class="min-w-[800px] flex flex-col space-y-4">
+                <div class="overflow-x-auto w-full">
+                    <div id="bracket-visualization-container" class="w-full flex flex-col justify-center">
                         <!-- Dynamic bracket structure will be rendered here -->
                     </div>
                 </div>
 
                 <!-- Print Footer Rule -->
-                <div class="mt-12 pt-4 border-t border-slate-200 text-center text-xs text-slate-400 font-medium">
+                <div class="mt-6 pt-3 border-t border-slate-200 text-center text-[10px] text-slate-400 font-medium">
                     본 대진표는 싱글 엘리미네이션 정식 규격에 의해 공정하게 랜덤으로 배치되었습니다.
                 </div>
             </div>
@@ -643,11 +690,11 @@
             const btnF = document.getElementById('gender-f-btn');
 
             if (gender === '남') {
-                btnM.className = "py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-blue-50 border-blue-600 text-blue-700";
-                btnF.className = "py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-white border-slate-200 text-slate-600 hover:border-slate-300";
+                btnM.className = "py-2.5 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-blue-50 border-blue-600 text-blue-700";
+                btnF.className = "py-2.5 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-white border-slate-200 text-slate-600 hover:border-slate-300";
             } else {
-                btnF.className = "py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-pink-50 border-pink-600 text-pink-700";
-                btnM.className = "py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-white border-slate-200 text-slate-600 hover:border-slate-300";
+                btnF.className = "py-2.5 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-pink-50 border-pink-600 text-pink-700";
+                btnM.className = "py-2.5 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-white border-slate-200 text-slate-600 hover:border-slate-300";
             }
             renderStudentsAndAbsentees();
         }
@@ -665,11 +712,11 @@
 
             // Grid Layout
             const grid = document.createElement('div');
-            grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3";
+            grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5";
 
             filtered.sort((a,b) => parseInt(a.num) - parseInt(b.num)).forEach(student => {
                 const label = document.createElement('label');
-                label.className = "flex items-center space-x-2.5 p-3 bg-white rounded-xl border border-slate-200 hover:border-indigo-300 cursor-pointer transition-all select-none text-xs font-semibold shadow-sm";
+                label.className = "flex items-center space-x-2.5 p-2 bg-white rounded-xl border border-slate-200 hover:border-indigo-300 cursor-pointer transition-all select-none text-xs font-semibold shadow-sm";
                 
                 const checkbox = document.createElement('input');
                 checkbox.type = "checkbox";
@@ -788,33 +835,38 @@
             return tempSlots;
         }
 
-        // Visual Bracket Generator using modern HTML structured design
+        // Visual Bracket Generator using modern HTML structured design (A4 Optimized)
         function renderBracketVisualization(initialSlots, size) {
             bracketVisualizationContainer.innerHTML = "";
             const roundsCount = Math.log2(size);
             
-            // Outer Wrapper
+            // Outer Wrapper (A4 가로폭에 가득 차도록 w-full 구조 설계)
             const bracketWrapper = document.createElement('div');
-            bracketWrapper.className = "flex items-stretch justify-between w-full py-4 gap-6";
+            bracketWrapper.className = "flex items-stretch justify-between w-full py-2 px-1 relative gap-6";
 
             let currentRoundPlayers = [...initialSlots];
 
             for (let r = 0; r <= roundsCount; r++) {
                 const roundCol = document.createElement('div');
-                roundCol.className = "flex-1 flex flex-col justify-around min-w-[180px] py-2 relative";
+                roundCol.className = "flex-1 flex flex-col justify-around relative";
                 
-                // Head labels
+                // 라운드 컬럼 구분선 (디자인 향상)
+                if (r > 0) {
+                    roundCol.className += " pl-2";
+                }
+
+                // Head labels (A4 한 장 안에 밀도를 높이기 위해 패딩 축소)
                 const roundHeader = document.createElement('div');
-                roundHeader.className = "text-center font-extrabold text-xs tracking-wider text-slate-400 uppercase mb-4 no-print";
+                roundHeader.className = "text-center font-extrabold text-[10px] tracking-wider text-slate-400 uppercase mb-3 no-print";
                 
                 if (r === roundsCount) {
-                    roundHeader.innerHTML = `<span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full border border-amber-300">👑 최종 우승자</span>`;
+                    roundHeader.innerHTML = `<span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-300">👑 우승</span>`;
                 } else if (r === roundsCount - 1) {
-                    roundHeader.innerText = "결승전";
+                    roundHeader.innerText = "결승";
                 } else if (r === roundsCount - 2) {
-                    roundHeader.innerText = "준결승 (4강)";
+                    roundHeader.innerText = "준결승";
                 } else {
-                    roundHeader.innerText = `${size / Math.pow(2, r)}강전`;
+                    roundHeader.innerText = `${size / Math.pow(2, r)}강`;
                 }
                 roundCol.appendChild(roundHeader);
 
@@ -822,30 +874,60 @@
                 const slotsCount = currentRoundPlayers.length;
                 for (let i = 0; i < slotsCount; i++) {
                     const item = currentRoundPlayers[i];
-                    const slotNode = document.createElement('div');
-                    slotNode.className = "my-4 flex flex-col justify-center items-center relative w-full";
-
-                    const card = document.createElement('div');
                     
+                    // 슬롯 전체 컨테이너
+                    const slotNode = document.createElement('div');
+                    slotNode.className = "my-1.5 flex flex-col justify-center items-center relative w-full h-[40px]"; // 높이 축소로 밀도 최적화
+
+                    // 카드 본체
+                    const card = document.createElement('div');
+                    card.className = "w-full text-center relative z-10 select-none transition-all";
+
                     if (item && item.isBye) {
-                        card.className = "w-full bg-slate-100 text-slate-400 border border-slate-200 rounded-xl p-3 text-xs text-center font-semibold italic flex items-center justify-center gap-1 shadow-inner";
-                        card.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5 text-slate-400"></i>부전승`;
+                        // 부전승 스타일 (A4 흑백 출력시에도 선명하게 구분되도록 보더 적용)
+                        card.className += " bg-slate-100 text-slate-400 border border-slate-300 rounded-lg p-1.5 text-[11px] font-semibold italic flex items-center justify-center gap-1 shadow-sm";
+                        card.innerHTML = `<i data-lucide="sparkles" class="w-3 h-3 text-slate-400"></i>부전승`;
                     } else if (item) {
-                        card.className = "w-full bg-white text-slate-800 border-2 border-slate-200 rounded-xl p-3 text-xs shadow-sm flex items-center justify-between hover:border-indigo-400 transition-all";
+                        // 일반 선수 카드 (보더 두께 강화 및 크기 간소화)
+                        card.className += " bg-white text-slate-800 border-2 border-slate-700 rounded-lg p-1.5 text-[11px] shadow-sm flex items-center justify-between";
                         
-                        const numBadge = item.num ? `<span class="bg-indigo-50 text-indigo-600 rounded px-1.5 py-0.5 text-[10px] font-extrabold mr-1.5">${item.num}번</span>` : '';
+                        const numBadge = item.num ? `<span class="bg-indigo-100 text-indigo-800 rounded px-1.5 py-0.5 text-[9px] font-extrabold mr-1">${item.num}번</span>` : '';
                         card.innerHTML = `
                             <div class="flex items-center truncate">
                                 ${numBadge}
-                                <span class="font-bold text-slate-800 text-sm truncate">${item.name}</span>
+                                <span class="font-extrabold text-slate-900 text-xs truncate">${item.name}</span>
                             </div>
+                            <div class="w-3.5 h-3.5 rounded-full border border-slate-400 bg-slate-50 flex items-center justify-center text-[8px] font-bold text-slate-400"></div>
                         `;
                     } else {
-                        card.className = "w-full bg-slate-50/50 text-slate-300 border border-dashed border-slate-200 rounded-xl p-3 text-xs text-center font-medium";
+                        // 대기선수 카드
+                        card.className += " bg-slate-50 text-slate-300 border border-dashed border-slate-300 rounded-lg p-1.5 text-[11px] font-medium";
                         card.innerText = "대기선수";
                     }
 
                     slotNode.appendChild(card);
+
+                    // ==========================================
+                    //  물리적 대진표 연결선 (브래킷 라인) 자동 드로잉
+                    // ==========================================
+                    if (r < roundsCount) {
+                        const connector = document.createElement('div');
+                        // 짝수 인덱스는 위쪽(top), 홀수 인덱스는 아래쪽(bottom) 라인 형성
+                        if (i % 2 === 0) {
+                            connector.className = "bracket-branch branch-top";
+                        } else {
+                            connector.className = "bracket-branch branch-bottom";
+                        }
+                        slotNode.appendChild(connector);
+                    }
+
+                    // 1라운드(r=0) 이후의 라운드에는 이전 라운드로부터 들어오는 수평선(branch-in) 배치
+                    if (r > 0) {
+                        const inConnector = document.createElement('div');
+                        inConnector.className = "branch-in";
+                        slotNode.appendChild(inConnector);
+                    }
+
                     roundCol.appendChild(slotNode);
                 }
 
@@ -864,7 +946,7 @@
                         } else if (p2 && p2.isBye && p1 && !p1.isBye) {
                             nextRoundList.push(p1);
                         } else {
-                            nextRoundList.push(null); // Place empty for future manual update or visual tree
+                            nextRoundList.push(null); // 대기 노출용
                         }
                     }
                     currentRoundPlayers = nextRoundList;
