@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>체육 수업용 배드민턴 토너먼트 발전기 (A4 가로 최적화)</title>
+    <title>체육 수업용 배드민턴 토너먼트 발전기 (A4 가로 스냅샷 인쇄)</title>
     <!-- Tailwind CSS for Modern UI -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons for aesthetic UI -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- html2canvas 라이브러리: 화면을 그대로 스크린샷 캡처하여 인쇄하기 위해 연동 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap');
         body {
@@ -16,66 +18,49 @@
             print-color-adjust: exact;
         }
 
-        /* A4용지 가로 한 장 인쇄 최적화 */
+        /* 인쇄 시 오직 캡처된 이미지 영역만 A4 가로 전체 화면으로 출력하고 나머지는 완벽히 숨김 */
         @media print {
             @page {
-                size: A4 landscape; /* 용지 방향 가로 고정 */
-                margin: 0.5cm 0.4cm 0.4cm 0.4cm; /* 상하좌우 여백 극소화 */
+                size: A4 landscape; /* 용지 가로 방향 강제 고정 */
+                margin: 0; /* 프린터 여백 없음 (이미지가 꽉 차도록 설정) */
             }
             body {
+                margin: 0;
+                padding: 0;
                 background-color: white;
-                color: black;
-                min-height: auto;
             }
-            .no-print {
+            /* 본문의 모든 요소를 숨김 */
+            body > *:not(#print-capture-container) {
                 display: none !important;
             }
-            .print-card {
-                box-shadow: none !important;
-                border: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                width: 100% !important;
-                max-width: 100% !important;
+            /* 캡처된 이미지가 포함된 프린트 전용 컨테이너만 노출 */
+            #print-capture-container {
+                display: block !important;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                margin: 0;
+                padding: 0;
+                background: white;
+                page-break-inside: avoid;
             }
-            
-            /* 가로 한 장 맞춤 강제 컴팩트 수축 */
-            #bracket-print-area {
-                height: 14.5cm !important; /* A4 가로 전체 높이에 부합하도록 수축 */
-                overflow: visible !important;
-            }
-            #bracket-outer-frame {
-                min-height: 290px !important;
-                height: 290px !important;
-            }
-            
-            /* 대진표 카드 간격 및 높이 컴팩트 축소 */
-            [id^="card-"] {
-                height: 22px !important;
-                font-size: 8px !important;
-                padding: 1px 4px !important;
-            }
-            
-            /* 중앙 결승전 영역 컴팩트 축소 */
-            #center-vs-badge {
-                width: 26px !important;
-                height: 26px !important;
-                font-size: 9px !important;
-                margin-top: 2px !important;
-                margin-bottom: 2px !important;
-            }
-            [id^="finalist-"] {
-                width: 105px !important;
-                padding: 3px !important;
-                font-size: 9px !important;
-            }
-            .no-print-gap {
-                gap: 4px !important;
+            #print-capture-image {
+                width: 100%;
+                height: 100%;
+                object-fit: contain; /* 가로 가로폭 비율에 맞춰 늘어짐 없이 꽉 차게 정렬 */
+                display: block;
             }
         }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- 인쇄 시 화면 스크린샷 이미지가 주입되는 영역 (평소에는 완전히 숨김) -->
+    <div id="print-capture-container" class="hidden">
+        <img id="print-capture-image" src="" alt="대진표 프린트 이미지" />
+    </div>
 
     <!-- Header Section (no-print) -->
     <header class="bg-gradient-to-r from-indigo-700 to-purple-700 text-white shadow-md no-print">
@@ -86,12 +71,12 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-extrabold tracking-tight">배드민턴 토너먼트 대진표 발전기</h1>
-                    <p class="text-xs text-indigo-100 mt-0.5">1반 ~ 13반 전체 명렬표 내장 • A4 가로 1장 완벽 대치 출력형</p>
+                    <p class="text-xs text-indigo-100 mt-0.5">1반 ~ 13반 전체 명렬표 내장 • 화면 스크린샷 1:1 출력 최적화</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2 text-xs bg-black/20 px-3.5 py-1.5 rounded-full border border-white/10">
                 <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-                <span>A4 가로 한 장 출력 최적화 완료</span>
+                <span>화면 그대로 캡처 인쇄 기능 탑재 완료</span>
             </div>
         </div>
     </header>
@@ -178,15 +163,15 @@
                         <i data-lucide="shuffle" class="w-3.5 h-3.5"></i>
                         <span>다시 섞기</span>
                     </button>
-                    <button onclick="window.print()" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5">
+                    <button onclick="printCapturedBracket()" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5">
                         <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-                        <span>A4 가로 인쇄 / PDF 저장</span>
+                        <span>화면 그대로 가로 인쇄 / PDF 저장</span>
                     </button>
                 </div>
             </div>
 
             <!-- Printable Paper Container -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 print-card flex-1 flex flex-col justify-between" id="bracket-print-area">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex-1 flex flex-col justify-between" id="bracket-print-area">
                 
                 <!-- Print Header -->
                 <div class="text-center border-b border-slate-300 pb-3 mb-4">
@@ -230,6 +215,17 @@
             <h4 class="text-base font-bold text-slate-950 mb-1" id="toast-title">오류</h4>
             <p class="text-sm text-slate-600 mb-4" id="toast-message">출전 인원을 확인해 주세요.</p>
             <button onclick="closeToast()" class="w-full bg-slate-900 hover:bg-slate-850 text-white font-semibold py-2 rounded-xl text-xs transition-all">확인</button>
+        </div>
+    </div>
+
+    <!-- 인쇄 캡처를 위한 로딩 모달 (no-print) -->
+    <div id="print-loading" class="fixed inset-0 bg-slate-900/80 hidden items-center justify-center z-[9999] no-print">
+        <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center gap-4 text-center">
+            <div class="w-12 h-12 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin"></div>
+            <div>
+                <h4 class="text-base font-bold text-slate-900">대진표 인쇄 준비 중</h4>
+                <p class="text-xs text-slate-500 mt-1">화면의 대진표를 고해상도 이미지로 변환하고 있습니다...</p>
+            </div>
         </div>
     </div>
 
@@ -697,23 +693,6 @@
                     drawBracketLines();
                 }
             });
-
-            // Perfect print layout hook for recalculating dynamic SVG heights before printing
-            window.onbeforeprint = function() {
-                if(!outputSection.classList.contains('hidden')) {
-                    // Slight delay for media styles to apply fully before redraw
-                    setTimeout(() => {
-                        drawBracketLines();
-                    }, 50);
-                }
-            };
-            window.onafterprint = function() {
-                if(!outputSection.classList.contains('hidden')) {
-                    setTimeout(() => {
-                        drawBracketLines();
-                    }, 50);
-                }
-            };
         };
 
         function changeClass(classNo) {
@@ -1166,6 +1145,50 @@
             path.setAttribute("stroke-linecap", "round");
             path.setAttribute("stroke-linejoin", "round");
             svgLines.appendChild(path);
+        }
+
+        // =========================================================================
+        // [핵심] 화면을 그대로 이미지 스냅샷 촬영하여 여백 없이 가로 인쇄 처리하는 로직
+        // =========================================================================
+        async function printCapturedBracket() {
+            const printArea = document.getElementById('bracket-print-area');
+            const loader = document.getElementById('print-loading');
+            
+            // 1. 로딩 화면 표시
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+            
+            // 약간의 딜레이를 주어 로딩 스피너 애니메이션이 브라우저에 즉시 그려지도록 유도
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // 캡처 전 SVG 라인의 좌표가 완전한지 한 번 더 갱신 실행
+            drawBracketLines();
+            
+            try {
+                // 2. html2canvas로 대진표 카드와 실선을 그대로 고화질 이미지(scale 2배)로 스냅샷 촬영
+                const canvas = await html2canvas(printArea, {
+                    scale: 2, // 인쇄 해상도를 위해 2배 조밀하게 렌더링
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                });
+                
+                // 3. 인쇄 전용 <img> 태그에 캡처본 이미지 주입
+                const printImg = document.getElementById('print-capture-image');
+                printImg.src = canvas.toDataURL('image/png');
+                
+                // 4. 변환 완료 후 로딩 창 닫기
+                loader.classList.add('hidden');
+                loader.classList.remove('flex');
+                
+                // 5. 브라우저 인쇄 모듈 호출 (미디어 쿼리에 의해 오직 스냅샷 이미지만 노출되어 가로 꽉 차게 인쇄됨)
+                window.print();
+            } catch (error) {
+                console.error(error);
+                loader.classList.add('hidden');
+                loader.classList.remove('flex');
+                showToast("인쇄 준비 실패", "화면을 이미지로 캡처하는 중 오류가 발생했습니다. 다시 생성 후 시도해주세요.");
+            }
         }
     </script>
 </body>
