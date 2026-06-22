@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>체육 수업용 배드민턴 토너먼트 발전기 (1~13반 전체 명렬 탑재)</title>
+    <!-- Tailwind CSS for Modern UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for aesthetic UI -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Pretendard', sans-serif;
+        }
+        /* Custom print styling */
+        @media print {
+            body {
+                background-color: white;
+                color: black;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header Section (no-print) -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md no-print">
+        <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-white/10 rounded-xl">
+                    <i data-lucide="sparkles" class="w-8 h-8 text-yellow-300"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight">배드민턴 토너먼트 대진표 발전기</h1>
+                    <p class="text-xs text-blue-100 mt-0.5">1반 ~ 13반 전체 명렬표 완벽 탑재 • 결석생 제외 대진표 랜덤 생성기</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 text-xs bg-black/20 px-3.5 py-2 rounded-full border border-white/10">
+                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+                <span>전교생(1~13반) 명단 탑재 완료!</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 md:py-8 flex-1 w-full">
+        
+        <!-- Step 1: Configuration Panel (no-print) -->
+        <section class="mb-8 no-print">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-6">
+                
+                <!-- Quick Selection Filters -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Class Selection -->
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <i data-lucide="graduation-cap" class="w-4 h-4 text-indigo-500"></i> 대상 학급 선택 (1반 ~ 13반)
+                        </label>
+                        <select id="class-select" onchange="changeClass(this.value)" class="w-full bg-slate-50 border-2 border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 p-3 font-bold">
+                            <!-- Dynamically generated options from 1 to 13 -->
+                        </select>
+                    </div>
+
+                    <!-- Gender Selection -->
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <i data-lucide="users" class="w-4 h-4 text-indigo-500"></i> 성별 선택
+                        </label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="gender-m-btn" onclick="selectGender('남')" class="py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-blue-50 border-blue-600 text-blue-700">
+                                남자부 (남)
+                            </button>
+                            <button id="gender-f-btn" onclick="selectGender('여')" class="py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-white border-slate-200 text-slate-600 hover:border-slate-300">
+                                여자부 (여)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <div class="flex items-end">
+                        <button id="generate-tournament-btn" onclick="buildTournament()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-lg shadow-indigo-150 flex items-center justify-center gap-2 text-base">
+                            <i data-lucide="git-branch" class="w-5 h-5"></i>
+                            <span>대진표 생성하기</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Absentee Quick Selector -->
+                <div class="border-t border-slate-100 pt-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                            <i data-lucide="user-minus" class="w-4 h-4 text-red-500"></i> 
+                            오늘 결석생 체크 (<span class="text-red-500">체크된 학생은 대진에서 즉시 제외됩니다</span>)
+                        </label>
+                        <button onclick="clearAllAbsentees()" class="text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-bold flex items-center gap-1">
+                            <i data-lucide="refresh-cw" class="w-3 h-3"></i> 전체 참석 처리 (초기화)
+                        </button>
+                    </div>
+                    
+                    <div id="absentee-container" class="bg-slate-50 rounded-xl p-4 border border-slate-200 min-h-[100px]">
+                        <!-- List of students dynamically rendered -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Step 2: Output Bracket Section -->
+        <section id="output-section" class="hidden">
+            
+            <!-- Result Stats Card (no-print) -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 no-print shadow-sm">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-emerald-100 text-emerald-800 p-2 rounded-lg">
+                        <i data-lucide="check" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800">대진표가 랜덤으로 작성되었습니다.</h3>
+                        <p class="text-xs text-slate-500" id="bracket-stat-summary">실제 출전: 0명 (부전승: 0명)</p>
+                    </div>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="buildTournament()" class="flex-1 sm:flex-none bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5">
+                        <i data-lucide="shuffle" class="w-3.5 h-3.5"></i>
+                        <span>다시 섞기</span>
+                    </button>
+                    <button onclick="window.print()" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5">
+                        <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                        <span>대진표 인쇄 / PDF 저장</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printable Paper Container -->
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200 print-card">
+                
+                <!-- Print Header -->
+                <div class="text-center border-b-2 border-slate-800 pb-5 mb-8">
+                    <span class="text-xs font-bold text-indigo-600 tracking-widest border border-indigo-200 bg-indigo-50 px-2.5 py-1 rounded-full">BADMINTON TOURNAMENT</span>
+                    <h2 id="print-title" class="text-3xl font-black text-slate-900 mt-2">반 배드민턴 토너먼트 대진표</h2>
+                    <div class="flex justify-center items-center gap-4 text-xs text-slate-500 mt-2 font-medium">
+                        <span id="print-date">작성일: 2026. 06. 22</span>
+                        <span>•</span>
+                        <span id="print-participants">출전 인원: 0명 (부전승 0명)</span>
+                    </div>
+                </div>
+
+                <!-- Visual Tournament Area -->
+                <div class="overflow-x-auto py-4">
+                    <div id="bracket-visualization-container" class="min-w-[800px] flex flex-col space-y-4">
+                        <!-- Dynamic bracket structure will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Print Footer Rule -->
+                <div class="mt-12 pt-4 border-t border-slate-200 text-center text-xs text-slate-400 font-medium">
+                    본 대진표는 싱글 엘리미네이션 정식 규격에 의해 공정하게 랜덤으로 배치되었습니다.
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Embedded Data & Tournament Script -->
+    <script>
+        // 1. 고정 명렬표 데이터 (1반부터 13반까지 완벽하게 통합 내장)
+        const studentDatabase = [
+            // 1반
+            { classNo: "1", num: "1", name: "김나연", gender: "여" },
+            { classNo: "1", num: "3", name: "김민건", gender: "남" },
+            { classNo: "1", num: "4", name: "김민결", gender: "남" },
+            { classNo: "1", num: "5", name: "김민서", gender: "여" },
+            { classNo: "1", num: "6", name: "김민재", gender: "남" },
+            { classNo: "1", num: "7", name: "김이영", gender: "여" },
+            { classNo: "1", num: "8", name: "김이정", gender: "여" },
+            { classNo: "1", num: "9", name: "김주원", gender: "남" },
+            { classNo: "1", num: "10", name: "김주하", gender: "여" },
+            { classNo: "1", num: "11", name: "김주형", gender: "남" },
+            { classNo: "1", num: "12", name: "류하진", gender: "여" },
+            { classNo: "1", num: "13", name: "박서진", gender: "여" },
+            { classNo: "1", num: "14", name: "박시우", gender: "여" },
+            { classNo: "1", num: "15", name: "서가온", gender: "여" },
+            { classNo: "1", num: "16", name: "선에단현준", gender: "남" },
+            { classNo: "1", num: "17", name: "신서후", gender: "남" },
+            { classNo: "1", num: "18", name: "신예준", gender: "남" },
+            { classNo: "1", num: "19", name: "안서윤", gender: "여" },
+            { classNo: "1", num: "20", name: "양리안", gender: "남" },
+            { classNo: "1", num: "21", name: "오영준", gender: "남" },
+            { classNo: "1", num: "22", name: "이도건", gender: "남" },
+            { classNo: "1", num: "23", name: "이현담", gender: "남" },
+            { classNo: "1", num: "24", name: "임정운", gender: "남" },
+            { classNo: "1", num: "25", name: "임현율", gender: "남" },
+            { classNo: "1", num: "26", name: "정민철", gender: "남" },
+            { classNo: "1", num: "27", name: "조민하", gender: "여" },
+            { classNo: "1", num: "28", name: "조예찬", gender: "남" },
+            { classNo: "1", num: "29", name: "주예은", gender: "여" },
+            { classNo: "1", num: "30", name: "주하진", gender: "남" },
+            { classNo: "1", num: "31", name: "황유경", gender: "여" },
+            { classNo: "1", num: "32", name: "조승현", gender: "남" },
+
+            // 2반
+            { classNo: "2", num: "1", name: "김성욱", gender: "남" },
+            { classNo: "2", num: "2", name: "김승찬", gender: "남" },
+            { classNo: "2", num: "3", name: "김시윤", gender: "남" },
+            { classNo: "2", num: "4", name: "김여울", gender: "여" },
+            { classNo: "2", num: "5", name: "김우주", gender: "남" },
+            { classNo: "2", num: "6", name: "김윤경", gender: "여" },
+            { classNo: "2", num: "7", name: "김주현", gender: "여" },
+            { classNo: "2", num: "8", name: "김지훈", gender: "남" },
+            { classNo: "2", num: "9", name: "김현민", gender: "남" },
+            { classNo: "2", num: "10", name: "나혜율", gender: "여" },
+            { classNo: "2", num: "11", name: "박도연", gender: "여" },
+            { classNo: "2", num: "12", name: "박태우", gender: "남" },
+            { classNo: "2", num: "13", name: "소성", gender: "남" },
+            { classNo: "2", num: "14", name: "유동헌", gender: "남" },
+            { classNo: "2", num: "15", name: "유승아", gender: "여" },
+            { classNo: "2", num: "16", name: "윤시우", gender: "남" },
+            { classNo: "2", num: "17", name: "윤찬서", gender: "남" },
+            { classNo: "2", num: "18", name: "이소명", gender: "여" },
+            { classNo: "2", num: "19", name: "이연희", gender: "여" },
+            { classNo: "2", num: "20", name: "이한비", gender: "여" },
+            { classNo: "2", num: "21", name: "이효연", gender: "여" },
+            { classNo: "2", num: "22", name: "임수정", gender: "여" },
+            { classNo: "2", num: "23", name: "임지율", gender: "여" },
+            { classNo: "2", num: "24", name: "장종훈", gender: "남" },
+            { classNo: "2", num: "25", name: "장주현", gender: "남" },
+            { classNo: "2", num: "26", name: "장하윤", gender: "여" },
+            { classNo: "2", num: "27", name: "전찬호", gender: "남" },
+            { classNo: "2", num: "28", name: "정선우", gender: "남" },
+            { classNo: "2", num: "29", name: "정시우", gender: "남" },
+            { classNo: "2", num: "30", name: "최강은", gender: "남" },
+            { classNo: "2", num: "31", name: "한유범", gender: "남" },
+
+            // 3반
+            { classNo: "3", num: "1", name: "고한결", gender: "여" },
+            { classNo: "3", num: "2", name: "권동혁", gender: "남" },
+            { classNo: "3", num: "3", name: "김인겸", gender: "남" },
+            { classNo: "3", num: "4", name: "박동우", gender: "남" },
+            { classNo: "3", num: "5", name: "박지우", gender: "여" },
+            { classNo: "3", num: "6", name: "박채원", gender: "여" },
+            { classNo: "3", num: "7", name: "백승우", gender: "남" },
+            { classNo: "3", num: "8", name: "서현우", gender: "남" },
+            { classNo: "3", num: "9", name: "성창훈", gender: "남" },
+            { classNo: "3", num: "10", name: "신채린", gender: "여" },
+            { classNo: "3", num: "11", name: "오서준", gender: "남" },
+            { classNo: "3", num: "12", name: "오시현", gender: "여" },
+            { classNo: "3", num: "13", name: "오예헌", gender: "남" },
+            { classNo: "3", num: "14", name: "유도현", gender: "여" },
+            { classNo: "3", num: "15", name: "유한빈", gender: "남" },
+            { classNo: "3", num: "16", name: "윤다은", gender: "여" },
+            { classNo: "3", num: "17", name: "이나윤", gender: "여" },
+            { classNo: "3", num: "18", name: "이동희", gender: "남" },
+            { classNo: "3", num: "19", name: "이성주", gender: "남" },
+            { classNo: "3", num: "20", name: "이준재", gender: "남" },
+            { classNo: "3", num: "21", name: "이지안", gender: "여" },
+            { classNo: "3", num: "22", name: "이환", gender: "남" },
+            { classNo: "3", num: "23", name: "임태윤", gender: "남" },
+            { classNo: "3", num: "24", name: "장유은", gender: "여" },
+            { classNo: "3", num: "25", name: "전소율", gender: "여" },
+            { classNo: "3", num: "26", name: "전윤찬", gender: "남" },
+            { classNo: "3", num: "27", name: "전지현", gender: "여" },
+            { classNo: "3", num: "28", name: "정근혁", gender: "남" },
+            { classNo: "3", num: "29", name: "주하준", gender: "남" },
+            { classNo: "3", num: "30", name: "최민준", gender: "남" },
+            { classNo: "3", num: "31", name: "최수아", gender: "여" },
+
+            // 4반
+            { classNo: "4", num: "1", name: "김가은", gender: "여" },
+            { classNo: "4", num: "2", name: "김대련", gender: "남" },
+            { classNo: "4", num: "3", name: "김서율", gender: "여" },
+            { classNo: "4", num: "4", name: "김소은", gender: "여" },
+            { classNo: "4", num: "5", name: "김유찬", gender: "남" },
+            { classNo: "4", num: "6", name: "김종호", gender: "남" },
+            { classNo: "4", num: "7", name: "김태준", gender: "남" },
+            { classNo: "4", num: "8", name: "노은설", gender: "여" },
+            { classNo: "4", num: "9", name: "류가영", gender: "여" },
+            { classNo: "4", num: "10", name: "박서연", gender: "여" },
+            { classNo: "4", num: "11", name: "박서용", gender: "남" },
+            { classNo: "4", num: "13", name: "손도진", gender: "남" },
+            { classNo: "4", num: "14", name: "손재윤", gender: "남" },
+            { classNo: "4", num: "15", name: "양익찬", gender: "남" },
+            { classNo: "4", num: "16", name: "위은호", gender: "남" },
+            { classNo: "4", num: "17", name: "유지후", gender: "남" },
+            { classNo: "4", num: "18", name: "윤예준", gender: "남" },
+            { classNo: "4", num: "19", name: "이서영", gender: "여" },
+            { classNo: "4", num: "20", name: "이승우", gender: "남" },
+            { classNo: "4", num: "21", name: "이연서", gender: "여" },
+            { classNo: "4", num: "22", name: "이연준", gender: "남" },
+            { classNo: "4", num: "23", name: "이유민", gender: "여" },
+            { classNo: "4", num: "24", name: "이윤승", gender: "남" },
+            { classNo: "4", num: "25", name: "임동균", gender: "남" },
+            { classNo: "4", num: "26", name: "장상효", gender: "남" },
+            { classNo: "4", num: "27", name: "전서연", gender: "여" },
+            { classNo: "4", num: "28", name: "정연우", gender: "여" },
+            { classNo: "4", num: "29", name: "하정훈", gender: "남" },
+            { classNo: "4", num: "30", name: "함채아", gender: "여" },
+            { classNo: "4", num: "31", name: "송혜인", gender: "여" },
+
+            // 5반
+            { classNo: "5", num: "1", name: "김가온", gender: "여" },
+            { classNo: "5", num: "2", name: "김도윤", gender: "남" },
+            { classNo: "5", num: "3", name: "김도은", gender: "여" },
+            { classNo: "5", num: "4", name: "김민하", gender: "여" },
+            { classNo: "5", num: "5", name: "김상윤", gender: "남" },
+            { classNo: "5", num: "6", name: "김서연", gender: "여" },
+            { classNo: "5", num: "7", name: "김서원", gender: "여" },
+            { classNo: "5", num: "8", name: "김아인", gender: "여" },
+            { classNo: "5", num: "9", name: "김지훈", gender: "남" },
+            { classNo: "5", num: "10", name: "노해율", gender: "남" },
+            { classNo: "5", num: "11", name: "박은성", gender: "남" },
+            { classNo: "5", num: "12", name: "백상운", gender: "남" },
+            { classNo: "5", num: "13", name: "서민준", gender: "남" },
+            { classNo: "5", num: "14", name: "손영석", gender: "남" },
+            { classNo: "5", num: "15", name: "손지호", gender: "남" },
+            { classNo: "5", num: "16", name: "신지호", gender: "남" },
+            { classNo: "5", num: "17", name: "우승건", gender: "남" },
+            { classNo: "5", num: "18", name: "윤연서", gender: "여" },
+            { classNo: "5", num: "19", name: "이여진", gender: "여" },
+            { classNo: "5", num: "20", name: "이지안", gender: "여" },
+            { classNo: "5", num: "21", name: "이진서", gender: "남" },
+            { classNo: "5", num: "22", name: "임소율", gender: "여" },
+            { classNo: "5", num: "23", name: "조승현", gender: "남" },
+            { classNo: "5", num: "24", name: "조하운", gender: "남" },
+            { classNo: "5", num: "25", name: "주지안", gender: "여" },
+            { classNo: "5", num: "26", name: "진재은", gender: "여" },
+            { classNo: "5", num: "27", name: "최선규", gender: "남" },
+            { classNo: "5", num: "28", name: "태동현", gender: "남" },
+            { classNo: "5", num: "29", name: "한상훈", gender: "남" },
+            { classNo: "5", num: "31", name: "정우진", gender: "남" },
+
+            // 6반
+            { classNo: "6", num: "1", name: "국다연", gender: "여" },
+            { classNo: "6", num: "2", name: "김가율", gender: "여" },
+            { classNo: "6", num: "3", name: "김정은", gender: "여" },
+            { classNo: "6", num: "4", name: "김정준", gender: "남" },
+            { classNo: "6", num: "5", name: "김태용", gender: "남" },
+            { classNo: "6", num: "6", name: "남대희", gender: "남" },
+            { classNo: "6", num: "7", name: "박도현", gender: "남" },
+            { classNo: "6", num: "8", name: "박서우", gender: "여" },
+            { classNo: "6", num: "9", name: "박지호", gender: "남" },
+            { classNo: "6", num: "10", name: "박채율", gender: "여" },
+            { classNo: "6", num: "11", name: "박태오", gender: "남" },
+            { classNo: "6", num: "12", name: "송건희", gender: "남" },
+            { classNo: "6", num: "13", name: "신수연", gender: "여" },
+            { classNo: "6", num: "14", name: "신연우", gender: "여" },
+            { classNo: "6", num: "15", name: "심태웅", gender: "남" },
+            { classNo: "6", num: "16", name: "안우진", gender: "남" },
+            { classNo: "6", num: "17", name: "윤아린", gender: "여" },
+            { classNo: "6", num: "18", name: "윤지우", gender: "여" },
+            { classNo: "6", num: "19", name: "이대원", gender: "남" },
+            { classNo: "6", num: "20", name: "이찬규", gender: "남" },
+            { classNo: "6", num: "21", name: "이채원", gender: "여" },
+            { classNo: "6", num: "22", name: "임서찬", gender: "남" },
+            { classNo: "6", num: "23", name: "장윤성", gender: "남" },
+            { classNo: "6", num: "24", name: "전지민", gender: "여" },
+            { classNo: "6", num: "25", name: "정수환", gender: "남" },
+            { classNo: "6", num: "26", name: "정훈찬", gender: "남" },
+            { classNo: "6", num: "27", name: "조아란", gender: "여" },
+            { classNo: "6", num: "28", name: "조현욱", gender: "남" },
+            { classNo: "6", num: "29", name: "최민규", gender: "남" },
+            { classNo: "6", num: "30", name: "최해원", gender: "여" },
+            { classNo: "6", num: "31", name: "황우진", gender: "남" },
+
+            // 7반
+            { classNo: "7", num: "1", name: "강나현", gender: "여" },
+            { classNo: "7", num: "2", name: "강필립", gender: "남" },
+            { classNo: "7", num: "3", name: "고율휘", gender: "남" },
+            { classNo: "7", num: "4", name: "김나연", gender: "여" },
+            { classNo: "7", num: "5", name: "김도현", gender: "남" },
+            { classNo: "7", num: "6", name: "김민서", gender: "여" },
+            { classNo: "7", num: "7", name: "김민재", gender: "남" },
+            { classNo: "7", num: "8", name: "김수현", gender: "남" },
+            { classNo: "7", num: "9", name: "김우겸", gender: "남" },
+            { classNo: "7", num: "10", name: "김정준", gender: "남" },
+            { classNo: "7", num: "11", name: "김현우", gender: "남" },
+            { classNo: "7", num: "12", name: "노민지", gender: "여" },
+            { classNo: "7", num: "13", name: "박윤수", gender: "남" },
+            { classNo: "7", num: "14", name: "박재욱", gender: "남" },
+            { classNo: "7", num: "15", name: "백재윤", gender: "남" },
+            { classNo: "7", num: "16", name: "백지훈", gender: "남" },
+            { classNo: "7", num: "17", name: "송원우", gender: "남" },
+            { classNo: "7", num: "18", name: "신예진", gender: "여" },
+            { classNo: "7", num: "19", name: "이동하", gender: "남" },
+            { classNo: "7", num: "20", name: "이승수", gender: "남" },
+            { classNo: "7", num: "21", name: "이시현", gender: "여" },
+            { classNo: "7", num: "22", name: "이아나", gender: "여" },
+            { classNo: "7", num: "23", name: "이예성", gender: "남" },
+            { classNo: "7", num: "24", name: "이유민", gender: "여" },
+            { classNo: "7", num: "25", name: "이한율", gender: "여" },
+            { classNo: "7", num: "26", name: "임준석", gender: "남" },
+            { classNo: "7", num: "27", name: "정지우", gender: "여" },
+            { classNo: "7", num: "28", name: "조하승", gender: "여" },
+            { classNo: "7", num: "29", name: "현병우", gender: "남" },
+            { classNo: "7", num: "30", name: "황지유", gender: "여" },
+
+            // 8반
+            { classNo: "8", num: "1", name: "김건우", gender: "남" },
+            { classNo: "8", num: "2", name: "김나림", gender: "여" },
+            { classNo: "8", num: "3", name: "김도현", gender: "남" },
+            { classNo: "8", num: "4", name: "김태연", gender: "여" },
+            { classNo: "8", num: "5", name: "김하윤", gender: "여" },
+            { classNo: "8", num: "6", name: "노승재", gender: "남" },
+            { classNo: "8", num: "7", name: "도현록", gender: "남" },
+            { classNo: "8", num: "8", name: "문수현", gender: "남" },
+            { classNo: "8", num: "9", name: "박유겸", gender: "남" },
+            { classNo: "8", num: "10", name: "박주완", gender: "남" },
+            { classNo: "8", num: "11", name: "박준효", gender: "남" },
+            { classNo: "8", num: "12", name: "방준혁", gender: "남" },
+            { classNo: "8", num: "13", name: "백준성", gender: "남" },
+            { classNo: "8", num: "14", name: "백희수", gender: "여" },
+            { classNo: "8", num: "15", name: "송유현", gender: "여" },
+            { classNo: "8", num: "16", name: "신재민", gender: "남" },
+            { classNo: "8", num: "17", name: "안소율", gender: "여" },
+            { classNo: "8", num: "18", name: "유아림", gender: "여" },
+            { classNo: "8", num: "19", name: "윤지예", gender: "여" },
+            { classNo: "8", num: "20", name: "이유빈", gender: "남" },
+            { classNo: "8", num: "21", name: "이은학", gender: "남" },
+            { classNo: "8", num: "22", name: "이지환", gender: "남" },
+            { classNo: "8", num: "23", name: "이해인", gender: "남" },
+            { classNo: "8", num: "24", name: "이효린", gender: "여" },
+            { classNo: "8", num: "25", name: "임지안", gender: "여" },
+            { classNo: "8", num: "26", name: "전아영", gender: "여" },
+            { classNo: "8", num: "27", name: "정상윤", gender: "남" },
+            { classNo: "8", num: "28", name: "조원우", gender: "남" },
+            { classNo: "8", num: "29", name: "주현서", gender: "여" },
+            { classNo: "8", num: "30", name: "채주완", gender: "남" },
+
+            // 9반
+            { classNo: "9", num: "1", name: "강리원", gender: "여" },
+            { classNo: "9", num: "2", name: "김단우", gender: "남" },
+            { classNo: "9", num: "3", name: "김도경", gender: "남" },
+            { classNo: "9", num: "4", name: "김도현", gender: "남" },
+            { classNo: "9", num: "5", name: "김민채", gender: "여" },
+            { classNo: "9", num: "6", name: "김소현", gender: "여" },
+            { classNo: "9", num: "7", name: "김솔", gender: "남" },
+            { classNo: "9", num: "8", name: "김시현", gender: "남" },
+            { classNo: "9", num: "9", name: "김유은", gender: "여" },
+            { classNo: "9", num: "10", name: "김지유", gender: "남" },
+            { classNo: "9", num: "11", name: "김지환", gender: "남" },
+            { classNo: "9", num: "12", name: "명지우", gender: "여" },
+            { classNo: "9", num: "13", name: "박윤우", gender: "남" },
+            { classNo: "9", num: "14", name: "방하윤", gender: "여" },
+            { classNo: "9", num: "15", name: "소원", gender: "남" },
+            { classNo: "9", num: "16", name: "손현규", gender: "남" },
+            { classNo: "9", num: "17", name: "송태율", gender: "남" },
+            { classNo: "9", num: "18", name: "심의현", gender: "남" },
+            { classNo: "9", num: "19", name: "유건", gender: "남" },
+            { classNo: "9", num: "20", name: "이강휘", gender: "남" },
+            { classNo: "9", num: "21", name: "이서준", gender: "남" },
+            { classNo: "9", num: "22", name: "이지수", gender: "여" },
+            { classNo: "9", num: "23", name: "이현승", gender: "남" },
+            { classNo: "9", num: "24", name: "임도경", gender: "여" },
+            { classNo: "9", num: "25", name: "정유나", gender: "여" },
+            { classNo: "9", num: "26", name: "조민건", gender: "남" },
+            { classNo: "9", num: "27", name: "조율아", gender: "여" },
+            { classNo: "9", num: "28", name: "한아인", gender: "여" },
+            { classNo: "9", num: "29", name: "허은서", gender: "여" },
+            { classNo: "9", num: "30", name: "홍다윤", gender: "여" },
+            { classNo: "9", num: "31", name: "홍수환", gender: "남" },
+
+            // 10반
+            { classNo: "10", num: "1", name: "김단우", gender: "남" },
+            { classNo: "10", num: "2", name: "김대원", gender: "남" },
+            { classNo: "10", num: "3", name: "김성민", gender: "남" },
+            { classNo: "10", num: "4", name: "김윤혜", gender: "여" },
+            { classNo: "10", num: "5", name: "김종윤", gender: "남" },
+            { classNo: "10", num: "6", name: "문지유", gender: "여" },
+            { classNo: "10", num: "7", name: "박민준", gender: "남" },
+            { classNo: "10", num: "8", name: "박제이", gender: "남" },
+            { classNo: "10", num: "9", name: "박주안", gender: "남" },
+            { classNo: "10", num: "10", name: "배현준", gender: "남" },
+            { classNo: "10", num: "11", name: "손지빈", gender: "남" },
+            { classNo: "10", num: "12", name: "신은재", gender: "여" },
+            { classNo: "10", num: "13", name: "심연수", gender: "여" },
+            { classNo: "10", num: "14", name: "심현두", gender: "남" },
+            { classNo: "10", num: "15", name: "원예준", gender: "남" },
+            { classNo: "10", num: "16", name: "윤수영", gender: "여" },
+            { classNo: "10", num: "17", name: "이건희", gender: "남" },
+            { classNo: "10", num: "18", name: "이서원", gender: "여" },
+            { classNo: "10", num: "19", name: "이서준", gender: "남" },
+            { classNo: "10", num: "20", name: "이영제", gender: "여" },
+            { classNo: "10", num: "21", name: "이은솔", gender: "여" },
+            { classNo: "10", num: "22", name: "이재용", gender: "남" },
+            { classNo: "10", num: "23", name: "이정원", gender: "여" },
+            { classNo: "10", num: "24", name: "임시현", gender: "여" },
+            { classNo: "10", num: "25", name: "임예린", gender: "여" },
+            { classNo: "10", num: "26", name: "전가람", gender: "남" },
+            { classNo: "10", num: "27", name: "전세영", gender: "여" },
+            { classNo: "10", num: "28", name: "정기윤", gender: "남" },
+            { classNo: "10", num: "29", name: "최윤서", gender: "여" },
+            { classNo: "10", num: "30", name: "최현우", gender: "남" },
+
+            // 11반
+            { classNo: "11", num: "1", name: "국혜린", gender: "여" },
+            { classNo: "11", num: "2", name: "권효주", gender: "여" },
+            { classNo: "11", num: "3", name: "기예성", gender: "남" },
+            { classNo: "11", num: "4", name: "김경흔", gender: "남" },
+            { classNo: "11", num: "5", name: "김동연", gender: "여" },
+            { classNo: "11", num: "6", name: "김민준", gender: "남" },
+            { classNo: "11", num: "7", name: "김시준", gender: "남" },
+            { classNo: "11", num: "8", name: "김시훈", gender: "남" },
+            { classNo: "11", num: "9", name: "김연우", gender: "여" },
+            { classNo: "11", num: "10", name: "김은석", gender: "남" },
+            { classNo: "11", num: "11", name: "김진수", gender: "남" },
+            { classNo: "11", num: "12", name: "김창환", gender: "남" },
+            { classNo: "11", num: "13", name: "김채유", gender: "남" },
+            { classNo: "11", num: "14", name: "김태리", gender: "여" },
+            { classNo: "11", num: "15", name: "김태욱", gender: "남" },
+            { classNo: "11", num: "16", name: "김현호", gender: "남" },
+            { classNo: "11", num: "17", name: "박규연", gender: "남" },
+            { classNo: "11", num: "18", name: "신원명", gender: "남" },
+            { classNo: "11", num: "19", name: "신윤호", gender: "남" },
+            { classNo: "11", num: "20", name: "신희찬", gender: "남" },
+            { classNo: "11", num: "21", name: "양지민", gender: "여" },
+            { classNo: "11", num: "22", name: "유소희", gender: "여" },
+            { classNo: "11", num: "23", name: "이지수", gender: "여" },
+            { classNo: "11", num: "24", name: "이찬희", gender: "남" },
+            { classNo: "11", num: "25", name: "이채원", gender: "여" },
+            { classNo: "11", num: "26", name: "정선우", gender: "남" },
+            { classNo: "11", num: "27", name: "정하윤", gender: "여" },
+            { classNo: "11", num: "28", name: "최윤지", gender: "여" },
+            { classNo: "11", num: "29", name: "최한율", gender: "여" },
+            { classNo: "11", num: "30", name: "표서연", gender: "여" },
+            { classNo: "11", num: "31", name: "김우림", gender: "여" },
+
+            // 12반
+            { classNo: "12", num: "1", name: "권율", gender: "남" },
+            { classNo: "12", num: "2", name: "김광민", gender: "남" },
+            { classNo: "12", num: "3", name: "김나연", gender: "여" },
+            { classNo: "12", num: "4", name: "김윤슬", gender: "여" },
+            { classNo: "12", num: "5", name: "김정인", gender: "남" },
+            { classNo: "12", num: "6", name: "김혜인", gender: "여" },
+            { classNo: "12", num: "7", name: "나상헌", gender: "남" },
+            { classNo: "12", num: "8", name: "박상훈", gender: "남" },
+            { classNo: "12", num: "9", name: "박소희", gender: "여" },
+            { classNo: "12", num: "10", name: "박정연", gender: "남" },
+            { classNo: "12", num: "11", name: "박주원", gender: "남" },
+            { classNo: "12", num: "12", name: "석민서", gender: "여" },
+            { classNo: "12", num: "13", name: "송선엽", gender: "남" },
+            { classNo: "12", num: "14", name: "송유찬", gender: "남" },
+            { classNo: "12", num: "15", name: "신동현", gender: "남" },
+            { classNo: "12", num: "16", name: "왕지승", gender: "남" },
+            { classNo: "12", num: "17", name: "원지우", gender: "여" },
+            { classNo: "12", num: "18", name: "유준희", gender: "여" },
+            { classNo: "12", num: "19", name: "이승주", gender: "여" },
+            { classNo: "12", num: "20", name: "이연희", gender: "여" },
+            { classNo: "12", num: "21", name: "이우진", gender: "남" },
+            { classNo: "12", num: "22", name: "이재인", gender: "여" },
+            { classNo: "12", num: "23", name: "이지한", gender: "남" },
+            { classNo: "12", num: "24", name: "이현성", gender: "남" },
+            { classNo: "12", num: "25", name: "임재진", gender: "남" },
+            { classNo: "12", num: "26", name: "장시원", gender: "남" },
+            { classNo: "12", num: "27", name: "전지원", gender: "여" },
+            { classNo: "12", num: "28", name: "정상화", gender: "남" },
+            { classNo: "12", num: "29", name: "최연제", gender: "여" },
+            { classNo: "12", num: "30", name: "황재인", gender: "여" },
+
+            // 13반
+            { classNo: "13", num: "1", name: "공유빈", gender: "여" },
+            { classNo: "13", num: "2", name: "곽서윤", gender: "여" },
+            { classNo: "13", num: "3", name: "김민우", gender: "남" },
+            { classNo: "13", num: "4", name: "김서인", gender: "여" },
+            { classNo: "13", num: "5", name: "김서현", gender: "여" },
+            { classNo: "13", num: "6", name: "김태은", gender: "남" },
+            { classNo: "13", num: "7", name: "노단우", gender: "남" },
+            { classNo: "13", num: "8", name: "박별하", gender: "여" },
+            { classNo: "13", num: "9", name: "박시원", gender: "남" },
+            { classNo: "13", num: "10", name: "박정우", gender: "남" },
+            { classNo: "13", num: "11", name: "박준서", gender: "남" },
+            { classNo: "13", num: "12", name: "박지민", gender: "남" },
+            { classNo: "13", num: "13", name: "백인서", gender: "남" },
+            { classNo: "13", num: "14", name: "송채영", gender: "여" },
+            { classNo: "13", num: "15", name: "양재영", gender: "남" },
+            { classNo: "13", num: "16", name: "양정혁", gender: "남" },
+            { classNo: "13", num: "17", name: "이서윤", gender: "여" },
+            { classNo: "13", num: "18", name: "이서준", gender: "남" },
+            { classNo: "13", num: "19", name: "이승찬", gender: "남" },
+            { classNo: "13", num: "20", name: "이지유", gender: "여" },
+            { classNo: "13", num: "21", name: "이하리", gender: "여" },
+            { classNo: "13", num: "22", name: "임찬수", gender: "남" },
+            { classNo: "13", num: "23", name: "장서진", gender: "남" },
+            { classNo: "13", num: "24", name: "장선우", gender: "남" },
+            { classNo: "13", num: "25", name: "장선주", gender: "여" },
+            { classNo: "13", num: "26", name: "조수아", gender: "여" },
+            { classNo: "13", num: "27", name: "조현우", gender: "남" },
+            { classNo: "13", num: "28", name: "최지훈", gender: "남" },
+            { classNo: "13", num: "29", name: "한나율", gender: "여" },
+            { classNo: "13", num: "30", name: "황동준", gender: "남" }
+        ];
+
+        // 2. Local State
+        let currentClass = "1";
+        let currentGender = "남";
+
+        // DOM Elements
+        const classSelect = document.getElementById('class-select');
+        const absenteeContainer = document.getElementById('absentee-container');
+        const outputSection = document.getElementById('output-section');
+        const printTitle = document.getElementById('print-title');
+        const printParticipants = document.getElementById('print-participants');
+        const bracketStatSummary = document.getElementById('bracket-stat-summary');
+        const bracketVisualizationContainer = document.getElementById('bracket-visualization-container');
+
+        // Initial setup
+        window.onload = function() {
+            // Set Default Date in Korean Style
+            const today = new Date();
+            document.getElementById('print-date').innerText = `작성일: ${today.getFullYear()}년 ${String(today.getMonth() + 1).padStart(2, '0')}월 ${String(today.getDate()).padStart(2, '0')}일`;
+            
+            // Generate Class Select options 1 to 13
+            classSelect.innerHTML = "";
+            for(let i = 1; i <= 13; i++) {
+                const option = document.createElement('option');
+                option.value = String(i);
+                option.innerText = `${i}반`;
+                classSelect.appendChild(option);
+            }
+            
+            lucide.createIcons();
+            renderStudentsAndAbsentees();
+        };
+
+        // Select Class dropdown controller
+        function changeClass(classNo) {
+            currentClass = classNo;
+            renderStudentsAndAbsentees();
+        }
+
+        // Select Gender UI control
+        function selectGender(gender) {
+            currentGender = gender;
+            const btnM = document.getElementById('gender-m-btn');
+            const btnF = document.getElementById('gender-f-btn');
+
+            if (gender === '남') {
+                btnM.className = "py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-blue-50 border-blue-600 text-blue-700";
+                btnF.className = "py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-white border-slate-200 text-slate-600 hover:border-slate-300";
+            } else {
+                btnF.className = "py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-pink-50 border-pink-600 text-pink-700";
+                btnM.className = "py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all text-center focus:outline-none bg-white border-slate-200 text-slate-600 hover:border-slate-300";
+            }
+            renderStudentsAndAbsentees();
+        }
+
+        // Render Student checkboxes
+        function renderStudentsAndAbsentees() {
+            const filtered = studentDatabase.filter(s => s.classNo === currentClass && s.gender === currentGender);
+            
+            absenteeContainer.innerHTML = "";
+
+            if (filtered.length === 0) {
+                absenteeContainer.innerHTML = `<p class="text-slate-400 text-center py-6 text-sm">해당 조건에 해당하는 학생이 명단에 없습니다.</p>`;
+                return;
+            }
+
+            // Grid Layout
+            const grid = document.createElement('div');
+            grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3";
+
+            filtered.sort((a,b) => parseInt(a.num) - parseInt(b.num)).forEach(student => {
+                const label = document.createElement('label');
+                label.className = "flex items-center space-x-2.5 p-3 bg-white rounded-xl border border-slate-200 hover:border-indigo-300 cursor-pointer transition-all select-none text-xs font-semibold shadow-sm";
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = "checkbox";
+                checkbox.value = `${student.classNo}-${student.num}-${student.name}`;
+                checkbox.className = "w-4.5 h-4.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer";
+                
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        label.classList.add('border-red-400', 'bg-red-50/50', 'text-red-700');
+                    } else {
+                        label.classList.remove('border-red-400', 'bg-red-50/50', 'text-red-700');
+                    }
+                });
+
+                const infoText = document.createElement('span');
+                infoText.innerText = `${student.num}번 ${student.name}`;
+
+                label.appendChild(checkbox);
+                label.appendChild(infoText);
+                grid.appendChild(label);
+            });
+
+            absenteeContainer.appendChild(grid);
+        }
+
+        // Reset all absentees
+        function clearAllAbsentees() {
+            const checkBoxes = absenteeContainer.querySelectorAll('input[type="checkbox"]');
+            checkBoxes.forEach(cb => {
+                cb.checked = false;
+                const label = cb.closest('label');
+                if (label) label.classList.remove('border-red-400', 'bg-red-50/50', 'text-red-700');
+            });
+        }
+
+        // Build Tournament Main Logic
+        function buildTournament() {
+            const studentsInGroup = studentDatabase.filter(s => s.classNo === currentClass && s.gender === currentGender);
+            
+            // Gather Checked Absentees keys
+            const absentList = Array.from(absenteeContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            
+            // Actual participants
+            const participants = studentsInGroup.filter(student => {
+                const uniqueKey = `${student.classNo}-${student.num}-${student.name}`;
+                return !absentList.includes(uniqueKey);
+            });
+
+            if (participants.length < 2) {
+                alert("토너먼트를 생성하기 위해서는 오늘 수업에 최소 2명 이상의 학생이 출전해야 합니다.");
+                return;
+            }
+
+            // Shuffle (Fisher-Yates) to randomize match position
+            const shuffled = [...participants];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+
+            // Power of 2 (capacity size)
+            const count = shuffled.length;
+            let bracketSize = 2;
+            while (bracketSize < count) {
+                bracketSize *= 2;
+            }
+
+            // Bye (부전승) Count
+            const byeCount = bracketSize - count;
+
+            // Distribute Players and BYEs
+            const distributedPlayers = distributePlayersAndByes(shuffled, bracketSize, byeCount);
+
+            // Display Output
+            outputSection.classList.remove('hidden');
+            printTitle.innerText = `${currentClass}반 배드민턴 토너먼트 대진표 (${currentGender === '남' ? '남자부' : '여자부'})`;
+            printParticipants.innerText = `출전 인원: ${count}명 (부전승: ${byeCount}명)`;
+            bracketStatSummary.innerText = `실제 출전: ${count}명 / 대진표 구성: ${bracketSize}강 (1라운드 부전승: ${byeCount}명)`;
+
+            // Render Tree
+            renderBracketVisualization(distributedPlayers, bracketSize);
+
+            // Smooth Scroll
+            outputSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Distribute Players and Byes logically so Byes don't match with Byes
+        function distributePlayersAndByes(players, size, byeCount) {
+            const matchCount = size / 2;
+            const tempSlots = new Array(size).fill(null);
+            
+            // Select which matches have a BYE
+            const matchesHaveBye = new Array(matchCount).fill(false);
+            if (byeCount > 0) {
+                const step = matchCount / byeCount;
+                for (let i = 0; i < byeCount; i++) {
+                    const matchIndex = Math.floor(i * step);
+                    matchesHaveBye[matchIndex] = true;
+                }
+            }
+
+            let playerIdx = 0;
+            // Distribute matches
+            for (let m = 0; m < matchCount; m++) {
+                if (matchesHaveBye[m]) {
+                    // One player, One BYE
+                    tempSlots[m * 2] = players[playerIdx++];
+                    tempSlots[m * 2 + 1] = { name: "부전승", isBye: true };
+                } else {
+                    // Two players
+                    tempSlots[m * 2] = players[playerIdx++];
+                    tempSlots[m * 2 + 1] = players[playerIdx++];
+                }
+            }
+
+            return tempSlots;
+        }
+
+        // Visual Bracket Generator using modern HTML structured design
+        function renderBracketVisualization(initialSlots, size) {
+            bracketVisualizationContainer.innerHTML = "";
+            const roundsCount = Math.log2(size);
+            
+            // Outer Wrapper
+            const bracketWrapper = document.createElement('div');
+            bracketWrapper.className = "flex items-stretch justify-between w-full py-4 gap-6";
+
+            let currentRoundPlayers = [...initialSlots];
+
+            for (let r = 0; r <= roundsCount; r++) {
+                const roundCol = document.createElement('div');
+                roundCol.className = "flex-1 flex flex-col justify-around min-w-[180px] py-2 relative";
+                
+                // Head labels
+                const roundHeader = document.createElement('div');
+                roundHeader.className = "text-center font-extrabold text-xs tracking-wider text-slate-400 uppercase mb-4 no-print";
+                
+                if (r === roundsCount) {
+                    roundHeader.innerHTML = `<span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full border border-amber-300">👑 최종 우승자</span>`;
+                } else if (r === roundsCount - 1) {
+                    roundHeader.innerText = "결승전";
+                } else if (r === roundsCount - 2) {
+                    roundHeader.innerText = "준결승 (4강)";
+                } else {
+                    roundHeader.innerText = `${size / Math.pow(2, r)}강전`;
+                }
+                roundCol.appendChild(roundHeader);
+
+                // Draw Cards
+                const slotsCount = currentRoundPlayers.length;
+                for (let i = 0; i < slotsCount; i++) {
+                    const item = currentRoundPlayers[i];
+                    const slotNode = document.createElement('div');
+                    slotNode.className = "my-4 flex flex-col justify-center items-center relative w-full";
+
+                    const card = document.createElement('div');
+                    
+                    if (item && item.isBye) {
+                        card.className = "w-full bg-slate-100 text-slate-400 border border-slate-200 rounded-xl p-3 text-xs text-center font-semibold italic flex items-center justify-center gap-1 shadow-inner";
+                        card.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5 text-slate-400"></i>부전승`;
+                    } else if (item) {
+                        card.className = "w-full bg-white text-slate-800 border-2 border-slate-200 rounded-xl p-3 text-xs shadow-sm flex items-center justify-between hover:border-indigo-400 transition-all";
+                        
+                        const numBadge = item.num ? `<span class="bg-indigo-50 text-indigo-600 rounded px-1.5 py-0.5 text-[10px] font-extrabold mr-1.5">${item.num}번</span>` : '';
+                        card.innerHTML = `
+                            <div class="flex items-center truncate">
+                                ${numBadge}
+                                <span class="font-bold text-slate-800 text-sm truncate">${item.name}</span>
+                            </div>
+                        `;
+                    } else {
+                        card.className = "w-full bg-slate-50/50 text-slate-300 border border-dashed border-slate-200 rounded-xl p-3 text-xs text-center font-medium";
+                        card.innerText = "대기선수";
+                    }
+
+                    slotNode.appendChild(card);
+                    roundCol.appendChild(slotNode);
+                }
+
+                bracketWrapper.appendChild(roundCol);
+
+                // Setup players for next round (Auto advancement for Byes)
+                if (r < roundsCount) {
+                    const nextRoundSize = currentRoundPlayers.length / 2;
+                    const nextRoundList = [];
+                    for (let n = 0; n < nextRoundSize; n++) {
+                        const p1 = currentRoundPlayers[n * 2];
+                        const p2 = currentRoundPlayers[n * 2 + 1];
+
+                        if (p1 && p1.isBye && p2 && !p2.isBye) {
+                            nextRoundList.push(p2);
+                        } else if (p2 && p2.isBye && p1 && !p1.isBye) {
+                            nextRoundList.push(p1);
+                        } else {
+                            nextRoundList.push(null); // Place empty for future manual update or visual tree
+                        }
+                    }
+                    currentRoundPlayers = nextRoundList;
+                }
+            }
+
+            bracketVisualizationContainer.appendChild(bracketWrapper);
+            
+            // Re-render Lucide Icons dynamically
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
